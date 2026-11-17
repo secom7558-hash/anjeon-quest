@@ -61,6 +61,10 @@ textarea:focus,input:focus,select:focus{border-color:var(--xp)}
 .pics .x{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-weight:800;line-height:1}
 .pics .add{border:2px dashed var(--line);background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--mute);font-size:13px;width:100%;height:100%;border-radius:12px}
 .pics .add b{font-size:28px;line-height:1}
+.pdf{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;background:var(--card2);color:var(--bad);text-align:center;padding:4px;overflow:hidden}
+.pdf b{font-size:18px;letter-spacing:.04em}
+.pdf small{color:var(--mute);font-size:11px;line-height:1.2;max-height:2.4em;overflow:hidden;word-break:break-all}
+.thumbs .pdfa{display:block;width:76px;height:76px;border-radius:10px;overflow:hidden;text-decoration:none;border:1px solid var(--line)}
 .cm{border-top:1px solid var(--line);padding:10px 0}
 .cm:first-child{border-top:0}
 .cm .who{font-weight:700;font-size:14px}
@@ -107,7 +111,7 @@ dialog img{max-width:96vw;max-height:92vh;display:block;border-radius:8px}
 </nav>
 <div class="toast" id="toast"></div>
 <dialog id="dlg"><img id="dlgImg" alt="사진"></dialog>
-<input type="file" id="fileIn" accept="image/*" multiple hidden>
+<input type="file" id="fileIn" accept="image/*,application/pdf,.pdf" multiple hidden>
 
 <script>
 var SUPA='https://ayenfffxeifvkpfawamu.supabase.co';
@@ -144,9 +148,14 @@ function getAll(p,step){step=step||1000;var out=[];function nx(o){return get(p+(
 function rpc(n,a){return api('/rest/v1/rpc/'+n,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(a||{})})}
 function pubUrl(p){return SUPA+'/storage/v1/object/public/photos/'+p.split('/').map(encodeURIComponent).join('/')}
 function thumbP(p){return p.replace(/\.jpg$/,'_t.jpg')}
-function upload(path,dataUrl){return fetch(dataUrl).then(function(r){return r.blob()}).then(function(b){
-  return fetch(SUPA+'/storage/v1/object/photos/'+path,{method:'POST',headers:H({'Content-Type':'image/jpeg','cache-control':'max-age=31536000'}),body:b}).catch(netErr).then(function(r){
-    if(!r.ok)return r.text().then(function(t){throw new Error('사진 올리기 실패: '+msgOf(t))})})})}
+function isPdf(p){return /\.pdf$/i.test(p||'')}
+/* body: dataURL 글자 또는 파일(Blob) */
+function upload(path,body,type){return (typeof body==='string'?fetch(body).then(function(r){return r.blob()}):Promise.resolve(body)).then(function(b){
+  return fetch(SUPA+'/storage/v1/object/photos/'+path,{method:'POST',headers:H({'Content-Type':type||'image/jpeg','cache-control':'max-age=31536000'}),body:b}).catch(netErr).then(function(r){
+    if(!r.ok)return r.text().then(function(t){throw new Error('올리기 실패: '+msgOf(t))})})})}
+/* 고른 파일 하나 준비: PDF는 그대로(10MB까지), 사진은 줄이기 */
+var PDF_MAX=10*1024*1024;
+function prep(file){if(file.type==='application/pdf'||isPdf(file.name)){if(file.size>PDF_MAX)return Promise.reject(new Error('PDF는 10MB까지 올릴 수 있습니다 ('+file.name+')'));return Promise.resolve({pdf:true,f:file,name:file.name,p:null})}return shrink(file)}
 /* 사진: 큰 것(긴 변 1200px) + 작은 것(320px) */
 function shrink(file){return new Promise(function(res,rej){
   var r=new FileReader();r.onerror=function(){rej(new Error('사진을 읽지 못했습니다'))};r.onload=function(){var im=new Image();im.onerror=function(){rej(new Error('이 사진 형식은 열 수 없습니다'))};im.onload=function(){
@@ -155,14 +164,19 @@ function shrink(file){return new Promise(function(res,rej){
     res({d:mk(1200,.75),t:mk(320,.7),p:null})};im.src=r.result};r.readAsDataURL(file)})}
 /* 아직 안 올린 사진만 올리고 경로 목록을 돌려줌(실패해도 올린 것은 기억 → 다시 누르면 이어서) */
 function uploadAll(arr){var i=0;function nx(){if(i>=arr.length)return Promise.resolve(arr.map(function(x){return x.p}));var it=arr[i++];if(it.p)return nx();
-  var p=ME.member_id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.jpg';
+  var base=ME.member_id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+  if(it.pdf){var q=base+'.pdf';return upload(q,it.f,'application/pdf').then(function(){it.p=q;return nx()})}
+  var p=base+'.jpg';
   return upload(p,it.d).then(function(){return upload(thumbP(p),it.t)}).then(function(){it.p=p;return nx()})}return nx()}
-function picker(arr,max,done){var f=$('fileIn');f.value='';f.onchange=function(){var fs=[].slice.call(f.files,0,Math.max(0,max-arr.length));
-  Promise.all(fs.map(shrink)).then(function(l){l.forEach(function(x){arr.push(x)});done()}).catch(function(e){alert(e.message);done()})};f.click()}
-function picsEditor(box,arr,max){function draw(){box.innerHTML=arr.map(function(it,i){return '<div><img src="'+(it.t||pubUrl(thumbP(it.p)))+'" alt="사진 '+(i+1)+'"><button class="x" data-x="'+i+'" type="button" aria-label="사진 빼기">×</button></div>'}).join('')+
-  (arr.length<max?'<div><button class="add" type="button" data-add="1"><b>+</b>사진</button></div>':'')}
+/* 여러 개를 골라도 한 장씩 차례로 처리(고화소 사진 메모리 부족 방지) */
+function picker(arr,max,done){var f=$('fileIn');f.value='';f.onchange=function(){var fs=[].slice.call(f.files,0,Math.max(0,max-arr.length)),errs=[];
+  fs.reduce(function(pr,file){return pr.then(function(){return prep(file).then(function(x){arr.push(x);done()},function(e){errs.push(e.message)})})},Promise.resolve())
+    .then(function(){done();if(errs.length)alert(errs.join('\n'))})};f.click()}
+function pdfTile(name){return '<span class="pdf"><b>PDF</b>'+(name?'<small>'+esc(name)+'</small>':'')+'</span>'}
+function picsEditor(box,arr,max){function draw(){box.innerHTML=arr.map(function(it,i){return '<div>'+(it.pdf||isPdf(it.p)?pdfTile(it.name):'<img src="'+(it.t||pubUrl(thumbP(it.p)))+'" alt="사진 '+(i+1)+'">')+'<button class="x" data-x="'+i+'" type="button" aria-label="빼기">×</button></div>'}).join('')+
+  (arr.length<max?'<div><button class="add" type="button" data-add="1"><b>+</b>사진·PDF</button></div>':'')}
   box.onclick=function(e){var x=e.target.closest('[data-x]');if(x){arr.splice(+x.dataset.x,1);draw();return}if(e.target.closest('[data-add]'))picker(arr,max,draw)};draw()}
-function thumbs(ps){return ps&&ps.length?'<div class="thumbs">'+ps.map(function(p){return '<img src="'+esc(pubUrl(thumbP(p)))+'" data-big="'+esc(p)+'" alt="사진" loading="lazy">'}).join('')+'</div>':''}
+function thumbs(ps){return ps&&ps.length?'<div class="thumbs">'+ps.map(function(p){return isPdf(p)?'<a class="pdfa" href="'+esc(pubUrl(p))+'" target="_blank" rel="noopener">'+pdfTile('열기')+'</a>':'<img src="'+esc(pubUrl(thumbP(p)))+'" data-big="'+esc(p)+'" alt="사진" loading="lazy">'}).join('')+'</div>':''}
 document.addEventListener('click',function(e){var b=e.target.closest('[data-big]');if(b){$('dlgImg').src=pubUrl(b.dataset.big);$('dlg').showModal()}});
 $('dlg').addEventListener('click',function(){$('dlg').close()});
 
