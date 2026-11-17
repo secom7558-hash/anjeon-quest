@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>안전 퀘스트</title>
+<meta name="theme-color" content="#161b33">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="안전 퀘스트">
+<style>
+:root{--bg:#161b33;--card:#232a4d;--card2:#2b3360;--track:#353d68;--ink:#eef0ff;--mute:#9aa3d6;--gold:#ffc93c;--goldink:#3b2a00;--xp:#5ce1e6;--step:#7c6cff;--stepink:#ffffff;--ok:#7dffa8;--bad:#ff7a8a;--line:#353d68;--shadow:none;color-scheme:dark}
+:root[data-theme="light"]{--bg:#eaf6ff;--card:#ffffff;--card2:#f3f8ff;--track:#dbe7f7;--ink:#1d2b4f;--mute:#5d6d93;--gold:#ff8a3d;--goldink:#ffffff;--xp:#3d8bff;--step:#ffd54a;--stepink:#4a3800;--ok:#1f9d55;--bad:#e5484d;--line:#d6e2f2;--shadow:0 1px 3px rgba(29,43,79,.08);color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;font-size:16px;line-height:1.5;padding-bottom:calc(76px + env(safe-area-inset-bottom));min-height:100vh}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:560px;margin:0 auto;padding:12px 16px}
+.top{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top)) 16px 6px;max-width:560px;margin:0 auto}
+.brand{font-size:11px;letter-spacing:.18em;color:var(--mute)}
+.brand b{color:var(--ink);font-size:17px;letter-spacing:.02em;display:block;font-weight:800}
+.card{background:var(--card);border-radius:16px;padding:14px;margin-top:12px;box-shadow:var(--shadow)}
+.row{display:flex;align-items:center;gap:10px}
+.sp{flex:1}
+.mute{color:var(--mute);font-size:13px}
+.h2{font-size:17px;font-weight:800;margin:20px 2px 4px}
+.bar{height:10px;border-radius:6px;background:var(--track);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--xp);border-radius:6px;transition:width .6s}
+.av{width:52px;height:52px;border-radius:14px;background:var(--gold);color:var(--goldink);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;flex:none}
+.av small{font-size:10px;font-weight:700}
+.av b{font-size:21px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;gap:4px;margin-top:8px}
+.stats b{display:block;font-size:22px}
+.stats span{font-size:12px;color:var(--mute)}
+.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}.c-xp{color:var(--xp)}.c-gold{color:var(--gold)}
+.steps{display:flex;gap:4px;margin-top:8px}
+.steps span{flex:1;text-align:center;font-size:12px;padding:3px 0;border-radius:7px;background:var(--track);color:var(--mute)}
+.steps span.on{background:var(--step);color:var(--stepink);font-weight:700}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:10px;background:var(--track);color:var(--ink);vertical-align:middle}
+.pill.ok{background:var(--ok);color:#0b2a17}.pill.bad{background:var(--bad);color:#3a0710}.pill.st{background:var(--step);color:var(--stepink)}.pill.gold{background:var(--gold);color:var(--goldink)}
+.item{display:block;width:100%;text-align:left;border:0;background:var(--card);border-radius:16px;padding:13px 14px;margin-top:10px;box-shadow:var(--shadow)}
+.item .t{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thumbs{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.thumbs img{width:76px;height:76px;object-fit:cover;border-radius:10px;background:var(--track)}
+.big{display:block;width:100%;border:0;border-radius:24px;padding:14px;font-weight:800;font-size:17px;background:var(--gold);color:var(--goldink);margin-top:14px}
+.big:disabled{opacity:.6}
+.btn{border:1px solid var(--line);background:var(--card2);border-radius:12px;padding:8px 13px;font-weight:700;font-size:14px}
+.btn.on{background:var(--step);color:var(--stepink);border-color:transparent}
+.btn.gold{background:var(--gold);color:var(--goldink);border-color:transparent}
+.btn.bad{color:var(--bad)}
+.lnk{border:0;background:none;color:var(--mute);font-size:13px;padding:4px;text-decoration:underline}
+textarea,input[type=text],input[type=password],input[type=tel],input[type=url],input[type=date],select{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 12px;outline:none}
+textarea{min-height:110px;resize:vertical}
+textarea:focus,input:focus,select:focus{border-color:var(--xp)}
+.pics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.pics div{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--track)}
+.pics img{width:100%;height:100%;object-fit:cover}
+.pics .x{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-weight:800;line-height:1}
+.pics .add{border:2px dashed var(--line);background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--mute);font-size:13px;width:100%;height:100%;border-radius:12px}
+.pics .add b{font-size:28px;line-height:1}
+.cm{border-top:1px solid var(--line);padding:10px 0}
+.cm:first-child{border-top:0}
+.cm .who{font-weight:700;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chk{display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--line)}
+.chk input{width:20px;height:20px}
+nav.tab{position:fixed;left:0;right:0;bottom:0;background:var(--card);display:flex;justify-content:space-around;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -1px 0 var(--line);z-index:5}
+nav.tab button{border:0;background:none;color:var(--mute);font-size:12px;font-weight:700;padding:4px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
+nav.tab button[aria-current=page]{color:var(--gold)}
+nav.tab svg{width:24px;height:24px}
+nav.tab .post{background:var(--gold);color:var(--goldink);border-radius:16px;padding:6px 18px}
+.dot{position:absolute;top:2px;right:8px;width:9px;height:9px;border-radius:50%;background:var(--bad)}
+.toast{position:fixed;left:50%;top:22%;transform:translate(-50%,0) scale(.8);background:var(--gold);color:var(--goldink);font-weight:800;font-size:22px;padding:14px 26px;border-radius:20px;opacity:0;pointer-events:none;transition:all .25s;z-index:20;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0) scale(1)}
+.toast small{display:block;font-size:13px;font-weight:600}
+.err{color:var(--bad);font-size:14px;margin-top:8px;min-height:1em}
+.names{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.names button{border:1px solid var(--line);background:var(--card2);border-radius:12px;padding:11px 4px;font-weight:700}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.keys button{border:0;background:var(--card2);border-radius:14px;padding:16px 0;font-size:22px;font-weight:800}
+.pin{display:flex;justify-content:center;gap:14px;margin-top:16px}
+.pin i{width:16px;height:16px;border-radius:50%;border:2px solid var(--mute)}
+.pin i.f{background:var(--gold);border-color:var(--gold)}
+dialog{border:0;padding:0;background:transparent;max-width:96vw;max-height:92vh}
+dialog::backdrop{background:rgba(0,0,0,.85)}
+dialog img{max-width:96vw;max-height:92vh;display:block;border-radius:8px}
+.lvtab{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+.lvtab td{padding:5px 4px;border-top:1px solid var(--line)}
+.badge{display:inline-flex;flex-direction:column;align-items:center;width:31%;margin:1%;padding:10px 4px;border-radius:14px;background:var(--card2);font-size:12px;text-align:center;color:var(--mute)}
+.badge b{font-size:26px;line-height:1.1;filter:grayscale(1);opacity:.35}
+.badge.got{color:var(--ink)}
+.badge.got b{filter:none;opacity:1}
+.empty{text-align:center;color:var(--mute);padding:24px 8px}
+.load{text-align:center;color:var(--mute);padding:40px 0}
+</style>
+</head>
+<body>
+<div class="top"><div class="brand">HYUNDAI IMC<b>안전 퀘스트</b></div><button class="lnk" id="themeBtn" type="button">밝은 화면</button></div>
+<main class="wrap" id="app"><div class="load">불러오는 중입니다…</div></main>
+<nav class="tab" id="tab" hidden>
+  <button data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>홈</button>
+  <button data-go="post" class="post"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>제안하기</button>
+  <button data-go="me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>내 기록<i class="dot" id="meDot" hidden></i></button>
+</nav>
+<div class="toast" id="toast"></div>
+<dialog id="dlg"><img id="dlgImg" alt="사진"></dialog>
+<input type="file" id="fileIn" accept="image/*" multiple hidden>
+
+<script>
+var SUPA='https://ayenfffxeifvkpfawamu.supabase.co';
+var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5ZW5mZmZ4ZWlmdmtwZmF3YW11Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ4NDcyNDYsImV4cCI6MjExMDQyMzI0Nn0.DpgGG2AxfFKjQO8OuN4IE9GMAhC40ipNcPwqJ0CZ7uE';
+var LV=[0,10,30,60,100,150,220,300,400,520,660,820,1000,1200,1500];
+var LVN=['새싹','견습생','관찰자','실천가','개선러','개선 장인','안전 지킴이','안전 고수','안전 마스터','안전 영웅','안전 명인','전설','전설','전설','전설'];
+var KIND={'제작':'제작','행동':'행동 변화','기타':'기타'};
+var IST={open:'의견 모으는 중',doing:'진행 중',review:'완료 확인 중',done:'클리어'};
+var TST={new:'확인 대기',adopted:'채택',held:'보류',filmed:'촬영함',discussed:'토의함',closed:'정리됨'};
+var TOK=null,ME=null,D={},busy=false;
+
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){}}
+function pad(n){return String(n).padStart(2,'0')}
+function kst(d){return new Date(new Date(d).getTime()+9*3600e3)}
+function ago(s){var d=new Date(s),m=Math.round((Date.now()-d)/60000);if(m<1)return '방금';if(m<60)return m+'분 전';if(m<1440)return Math.round(m/60)+'시간 전';var k=kst(d);if(m<10080)return Math.round(m/1440)+'일 전';return (k.getUTCMonth()+1)+'/'+k.getUTCDate()}
+function ymd(s){var k=kst(s);return k.getUTCFullYear()+'.'+pad(k.getUTCMonth()+1)+'.'+pad(k.getUTCDate())}
+function monthStartISO(){var k=kst(Date.now());return new Date(Date.UTC(k.getUTCFullYear(),k.getUTCMonth(),1)-9*3600e3).toISOString()}
+function yearOf(s){return kst(s).getUTCFullYear()}
+
+/* ---------- 서버 ---------- */
+function H(x){var h={apikey:KEY,Authorization:'Bearer '+KEY};for(var k in x)h[k]=x[k];return h}
+function msgOf(t){try{var j=JSON.parse(t);return j.message||t}catch(e){return t}}
+function netErr(e){if(e instanceof TypeError)throw new Error('인터넷 연결을 확인해 주세요');throw e}
+function api(path,opt){opt=opt||{};opt.headers=H(opt.headers);
+  return fetch(SUPA+path,opt).catch(netErr).then(function(r){
+    if(!r.ok)return r.text().then(function(t){var m=msgOf(t)||('오류 '+r.status);if(/다시 로그인/.test(m)){logoutLocal();showLogin();throw new Error('다시 로그인해 주세요')}throw new Error(m)});
+    return r.status===204?null:r.json().catch(function(){return null})})}
+function get(p){return api('/rest/v1/'+p)}
+/* 서버는 한 번에 1000줄까지만 줌 → 끝까지 나눠 받기(p에 순서 지정 필수) */
+function getAll(p,step){step=step||1000;var out=[];function nx(o){return get(p+(p.indexOf('?')>=0?'&':'?')+'limit='+step+'&offset='+o).then(function(r){out=out.concat(r);return r.length<step?out:nx(o+step)})}return nx(0)}
+function rpc(n,a){return api('/rest/v1/rpc/'+n,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(a||{})})}
+function pubUrl(p){return SUPA+'/storage/v1/object/public/photos/'+p.split('/').map(encodeURIComponent).join('/')}
+function thumbP(p){return p.replace(/\.jpg$/,'_t.jpg')}
+function upload(path,dataUrl){return fetch(dataUrl).then(function(r){return r.blob()}).then(function(b){
+  return fetch(SUPA+'/storage/v1/object/photos/'+path,{method:'POST',headers:H({'Content-Type':'image/jpeg','cache-control':'max-age=31536000'}),body:b}).catch(netErr).then(function(r){
+    if(!r.ok)return r.text().then(function(t){throw new Error('사진 올리기 실패: '+msgOf(t))})})})}
+/* 사진: 큰 것(긴 변 1200px) + 작은 것(320px) */
+function shrink(file){return new Promise(function(res,rej){
+  var r=new FileReader();r.onerror=function(){rej(new Error('사진을 읽지 못했습니다'))};r.onload=function(){var im=new Image();im.onerror=function(){rej(new Error('이 사진 형식은 열 수 없습니다'))};im.onload=function(){
+    function mk(L,q){var s=Math.min(1,L/Math.max(im.width,im.height)),cv=document.createElement('canvas');
+      cv.width=Math.round(im.width*s);cv.height=Math.round(im.height*s);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);return cv.toDataURL('image/jpeg',q)}
+    res({d:mk(1200,.75),t:mk(320,.7),p:null})};im.src=r.result};r.readAsDataURL(file)})}
+/* 아직 안 올린 사진만 올리고 경로 목록을 돌려줌(실패해도 올린 것은 기억 → 다시 누르면 이어서) */
+function uploadAll(arr){var i=0;function nx(){if(i>=arr.length)return Promise.resolve(arr.map(function(x){return x.p}));var it=arr[i++];if(it.p)return nx();
+  var p=ME.member_id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.jpg';
+  return upload(p,it.d).then(function(){return upload(thumbP(p),it.t)}).then(function(){it.p=p;return nx()})}return nx()}
+function picker(arr,max,done){var f=$('fileIn');f.value='';f.onchange=function(){var fs=[].slice.call(f.files,0,Math.max(0,max-arr.length));
+  Promise.all(fs.map(shrink)).then(function(l){l.forEach(function(x){arr.push(x)});done()}).catch(function(e){alert(e.message);done()})};f.click()}
+function picsEditor(box,arr,max){function draw(){box.innerHTML=arr.map(function(it,i){return '<div><img src="'+(it.t||pubUrl(thumbP(it.p)))+'" alt="사진 '+(i+1)+'"><button class="x" data-x="'+i+'" type="button" aria-label="사진 빼기">×</button></div>'}).join('')+
+  (arr.length<max?'<div><button class="add" type="button" data-add="1"><b>+</b>사진</button></div>':'')}
+  box.onclick=function(e){var x=e.target.closest('[data-x]');if(x){arr.splice(+x.dataset.x,1);draw();return}if(e.target.closest('[data-add]'))picker(arr,max,draw)};draw()}
+function thumbs(ps){return ps&&ps.length?'<div class="thumbs">'+ps.map(function(p){return '<img src="'+esc(pubUrl(thumbP(p)))+'" data-big="'+esc(p)+'" alt="사진" loading="lazy">'}).join('')+'</div>':''}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-big]');if(b){$('dlgImg').src=pubUrl(b.dataset.big);$('dlg').showModal()}});
+$('dlg').addEventListener('click',function(){$('dlg').close()});
+
+/* ---------- 공통 ---------- */
+function toast(t,sub){var e=$('toast');e.innerHTML=esc(t)+(sub?'<small>'+esc(sub)+'</small>':'');e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){e.classList.remove('on')},1700)}
+function ptsToast(n,what){if(n>0)toast('+'+n+'점',what);else toast(what||'올렸습니다','오늘 작은 점수는 다 모았습니다')}
+function level(total){var lv=0;for(var i=0;i<LV.length;i++)if(total>=LV[i])lv=i;var nx=LV[lv+1];
+  return{lv:lv+1,name:LVN[lv]||'전설',cur:LV[lv],next:nx,pct:nx?Math.round((total-LV[lv])/(nx-LV[lv])*100):100}}
+/* 나중에 캐릭터 그림으로 바꿀 자리 */
+function avatar(lv){return '<div class="av" aria-label="레벨 '+lv+'"><small>LV</small><b>'+lv+'</b></div>'}
+function nm(id){var m=D.mem&&D.mem[id];return m?m.name:'?'}
+function isAdmin(){return ME&&ME.role==='admin'}
+function topicStep(t){var s={new:0,held:0,adopted:1,filmed:2,discussed:3,closed:3}[t.status]||0;
+  if((D.ideas||[]).some(function(i){return i.topic_id===t.id&&i.status==='done'}))s=4;return s}
+function stepsHtml(t){var st=topicStep(t),L=['제안','채택','촬영','토의','개선'];return '<div class="steps">'+L.map(function(x,i){return '<span class="'+(i<=st?'on':'')+'">'+x+'</span>'}).join('')+'</div>'}
+function overdue(i){return(i.status==='open'||i.status==='doing')&&(Date.now()-new Date(i.created_at))>30*864e5}
+function monthsOld(i){return Math.max(1,Math.floor((Date.now()-new Date(i.created_at))/(30*864e5)))}
+function ideaPill(i){if(i.status==='done')return '<span class="pill ok">클리어</span>';if(overdue(i))return '<span class="pill bad">'+monthsOld(i)+'개월째</span>';
+  if(i.status==='review')return '<span class="pill gold">완료 확인 중</span>';return '<span class="pill st">'+IST[i.status]+'</span>'}
+function setTheme(t){if(t==='light')document.documentElement.dataset.theme='light';else delete document.documentElement.dataset.theme;
+  $('themeBtn').textContent=t==='light'?'어두운 화면':'밝은 화면';document.querySelector('meta[name=theme-color]').content=t==='light'?'#eaf6ff':'#161b33'}
+$('themeBtn').onclick=function(){var t=lsGet('sa-theme')==='light'?'dark':'light';lsSet('sa-theme',t);setTheme(t)};
+setTheme(lsGet('sa-theme'));
+
+/* ---------- 자료 ---------- */
+function loadAll(){return Promise.all([
+  get('members?select=id,name,team,role,active'),
+  getAll('topics?select=*&order=created_at.desc,id.desc'),
+  getAll('ideas?select=*&order=created_at.desc,id.desc'),
+  getAll('idea_members?select=*&order=idea_id,member_id'),
+  get('scores?select=*'),
+  getAll('points?select=member_id,pts,rule_key,at&at=gte.'+encodeURIComponent(monthStartISO())+'&order=id'),
+  getAll('comments?select=topic_id&order=id'),
+  get('point_rules?select=*')
+]).then(function(r){D.mem={};r[0].forEach(function(m){D.mem[m.id]=m});D.members=r[0];D.topics=r[1];D.ideas=r[2];D.im=r[3];D.scores=r[4];D.mpts=r[5];
+  D.ccount={};r[6].forEach(function(c){D.ccount[c.topic_id]=(D.ccount[c.topic_id]||0)+1});D.rules={};r[7].forEach(function(x){D.rules[x.key]=x});D.at=Date.now();updateDots()})}
+function myScore(){var s=(D.scores||[]).filter(function(x){return x.member_id===ME.member_id})[0];return s?s.total:0}
+function updateDots(){if(!ME||!D.topics)return;var seen=+(lsGet('sa-seen')||0),n=0;
+  D.topics.forEach(function(t){if(t.author_id===ME.member_id&&t.status!=='new'&&new Date(t.updated_at)>seen)n++});
+  D.ideas.forEach(function(i){var mine=D.im.some(function(x){return x.idea_id===i.id&&x.member_id===ME.member_id});if(mine&&i.judge_note&&new Date(i.updated_at)>seen)n++});
+  if(isAdmin())n+=D.topics.filter(function(t){return t.status==='new'}).length+D.ideas.filter(function(i){return i.status==='review'}).length;
+  $('meDot').hidden=!n}
+
+/* ---------- 이동 ---------- */
+function go(h){if(location.hash==='#'+h)route();else location.hash=h}
+window.addEventListener('hashchange',route);
+$('tab').addEventListener('click',function(e){var b=e.target.closest('[data-go]');if(b)go(b.dataset.go)});
+function route(){var h=(location.hash||'#home').slice(1);if(!TOK){showLogin();return}
+  $('tab').hidden=false;[].forEach.call($('tab').children,function(b){b.toggleAttribute('aria-current',b.dataset.go===h.split('/')[0]);if(b.dataset.go===h.split('/')[0])b.setAttribute('aria-current','page')});
+  window.scrollTo(0,0);var p=h.split('/');
+  var need=!D.at||Date.now()-D.at>20000;
+  (need?loadAll():Promise.resolve()).then(function(){
+    if(p[0]==='post')return showPost();if(p[0]==='t')return showTopic(p[1]);if(p[0]==='i')return showIdea(p[1]);if(p[0]==='me')return showMe();if(p[0]==='admin')return showAdmin();return showHome()
+  }).catch(function(e){$('app').innerHTML='<div class="card"><b>불러오지 못했습니다</b><p class="mute">'+esc(e.message)+'</p><button class="btn" onclick="D.at=0;route()">다시 시도</button></div>'})}
+function refresh(){D.at=0;route()}
+
+/* ---------- 로그인 ---------- */
+/* 쓰던 제안(sa-draft)은 남김 — 다시 로그인한 뒤 이어서 올릴 수 있게. 직접 로그아웃할 때만 지움 */
+function logoutLocal(){TOK=null;ME=null;D={};lsSet('sa-token',null);lsSet('sa-me',null)}
+function showLogin(){$('tab').hidden=true;$('app').innerHTML='<div class="load">명단을 불러오는 중입니다…</div>';
+  get('members?select=id,name,team,role,active&active=is.true&order=name').then(function(ms){var g={};ms.forEach(function(m){(g[m.team||'기타']=g[m.team||'기타']||[]).push(m)});
+    $('app').innerHTML='<div class="card" style="text-align:center"><div style="font-size:22px;font-weight:800">안전 퀘스트 접속</div><div class="mute">내 이름을 눌러 주세요</div></div>'+
+      Object.keys(g).map(function(t){return '<div class="h2">'+esc(t)+'</div><div class="names">'+g[t].map(function(m){return '<button data-n="'+esc(m.name)+'" data-r="'+m.role+'" type="button">'+esc(m.name)+'</button>'}).join('')+'</div>'}).join('')+
+      (ms.length?'':'<div class="empty">아직 명단이 없습니다. 운영진에게 말씀해 주세요.</div>');
+    $('app').onclick=function(e){var b=e.target.closest('[data-n]');if(b){$('app').onclick=null;pinStep(b.dataset.n,b.dataset.r)}}
+  }).catch(function(e){$('app').innerHTML='<div class="card"><b>서버에 연결하지 못했습니다</b><p class="mute">'+esc(e.message)+'</p><button class="btn" onclick="showLogin()">다시 시도</button></div>'})}
+function pinStep(name,role){var admin=role==='admin';
+  rpc('has_pin',{p_name:name}).then(function(has){var first=!has,stage=0,v1='';
+    function screen(){var title=first?(stage===0?'처음입니다. 쓸 번호를 정해 주세요':'같은 번호를 한 번 더 넣어 주세요'):'번호를 넣어 주세요';
+      $('app').innerHTML='<div class="card" style="text-align:center"><div class="mute">'+esc(name)+'</div><div style="font-size:19px;font-weight:800;margin-top:4px">'+title+'</div>'+
+        (admin?'<div class="mute">운영진은 6자리 이상</div><input type="password" id="pw" autocomplete="current-password" style="margin-top:14px"><button class="big" id="pwGo" type="button">확인</button>':
+        '<div class="pin" id="dots">'+[0,1,2,3].map(function(){return '<i></i>'}).join('')+'</div><div class="keys" id="keys">'+[1,2,3,4,5,6,7,8,9,'',0,'←'].map(function(k){return k===''?'<span></span>':'<button type="button" data-k="'+k+'">'+k+'</button>'}).join('')+'</div>')+
+        '<div class="err" id="err"></div><button class="lnk" id="back" type="button">다른 이름 고르기</button></div>';
+      $('back').onclick=showLogin;var buf='';
+      function submit(v){if(first&&stage===0){v1=v;stage=1;screen();return}if(first&&v!==v1){stage=0;screen();$('err').textContent='두 번 넣은 번호가 다릅니다. 처음부터 다시 정해 주세요.';return}doLogin(name,v)}
+      if(admin){$('pwGo').onclick=function(){submit($('pw').value)};$('pw').onkeydown=function(e){if(e.key==='Enter')submit($('pw').value)};$('pw').focus()}
+      else $('keys').onclick=function(e){var b=e.target.closest('[data-k]');if(!b)return;var k=b.dataset.k;if(k==='←')buf=buf.slice(0,-1);else if(buf.length<4)buf+=k;
+        [].forEach.call($('dots').children,function(d,i){d.classList.toggle('f',i<buf.length)});if(buf.length===4){var v=buf;buf='';setTimeout(function(){submit(v)},120)}}}
+    function doLogin(n,v){rpc('login',{p_name:n,p_pin:v}).then(function(j){
+      if(j.error){var m={'번호 틀림':'번호가 맞지 않습니다'+(j.left?' (남은 기회 '+j.left+'번)':''),'잠김':'번호를 여러 번 틀려 10분 동안 잠겼습니다','번호 형식':admin?'6자리 이상 넣어 주세요':'숫자 4자리를 넣어 주세요','명단에 없음':'명단에 없는 이름입니다','운영진 암호 미설정':'운영진 암호가 아직 없습니다. 다른 운영진에게 정해 달라고 해 주세요'}[j.error]||j.error;
+        screen();$('err').textContent=m;return}
+      TOK=j.token;ME={member_id:j.member_id,name:j.name,role:j.role};D={};lsSet('sa-token',TOK);lsSet('sa-me',JSON.stringify(ME));
+      if(!lsGet('sa-seen'))lsSet('sa-seen',String(Date.now()));toast(j.first?'환영합니다!':'접속 완료',j.name);go('home')}).catch(function(e){screen();$('err').textContent=e.message})}
+    screen()}).catch(function(e){alert(e.message)})}
+
+/* ---------- 홈 ---------- */
+function showHome(){var me=ME,tot=myScore(),L=level(tot),yr=kst(Date.now()).getUTCFullYear();
+  var done=D.ideas.filter(function(i){return i.status==='done'&&i.done_at&&yearOf(i.done_at)===yr}).length,goal=(D.rules._goal||{}).pts||30;
+  var doing=D.ideas.filter(function(i){return i.status==='doing'||i.status==='review'}).length,late=D.ideas.filter(overdue).length;
+  var act=D.members.filter(function(m){return m.active}),part={};D.mpts.forEach(function(p){if(p.pts>0)part[p.member_id]=1});
+  var king={};D.mpts.forEach(function(p){if(p.rule_key==='done'&&p.pts>0)king[p.member_id]=(king[p.member_id]||0)+p.pts});
+  var kid=Object.keys(king).sort(function(a,b){return king[b]-king[a]})[0];
+  var mm=kst(Date.now()).getUTCMonth()+1,ms=monthStartISO();
+  var topics=D.topics.filter(function(t){return t.created_at>=ms||t.status==='adopted'||t.status==='filmed'}).slice(0,15);
+  var open=D.ideas.filter(function(i){return i.status!=='done'}).sort(function(a,b){return overdue(b)-overdue(a)||(a.created_at<b.created_at?-1:1)}).slice(0,8);
+  $('app').innerHTML=
+   '<div class="card row">'+avatar(L.lv)+'<div class="sp"><div><b>'+esc(me.name)+'</b> <span class="pill gold">'+esc(L.name)+'</span>'+(isAdmin()?' <span class="pill st">운영진</span>':'')+'</div>'+
+     '<div class="bar"><i style="width:'+L.pct+'%"></i></div><div class="mute">XP '+tot+(L.next?' / '+L.next+' · 다음 레벨까지 '+(L.next-tot)+'점':' · 최고 레벨')+'</div></div></div>'+
+   '<div class="card"><div class="row"><b>우리 팀 '+yr+'</b><span class="sp"></span><span class="mute">'+mm+'월 참여 '+Object.keys(part).filter(function(id){return D.mem[id]&&D.mem[id].active}).length+'/'+act.length+'명</span></div>'+
+     '<div class="bar"><i style="width:'+Math.min(100,Math.round(done/goal*100))+'%;background:var(--ok)"></i></div><div class="mute">올해 개선 클리어 '+done+' / 목표 '+goal+'</div>'+
+     '<div class="stats"><div><b class="c-ok">'+done+'</b><span>클리어</span></div><div><b class="c-xp">'+doing+'</b><span>진행 중</span></div><div><b class="c-bad">'+late+'</b><span>밀린 것</span></div><div><b class="c-gold" style="font-size:16px;line-height:33px">'+(kid?esc(nm(kid)):'-')+'</b><span>이달의 개선왕</span></div></div></div>'+
+   (isAdmin()?'<button class="item" onclick="go(\'admin\')"><span class="t">운영진: 확인할 것 '+(D.topics.filter(function(t){return t.status==='new'}).length+D.ideas.filter(function(i){return i.status==='review'}).length)+'건</span><span class="mute">새 제안 확인·완료 판단</span></button>':'')+
+   '<div class="h2">이번 달 주제</div>'+(topics.length?topics.map(topicItem).join(''):'<div class="empty">아직 주제가 없습니다. 첫 제안을 올려 주세요!</div>')+
+   '<div class="h2">진행 중인 개선</div>'+(open.length?open.map(ideaItem).join(''):'<div class="empty">진행 중인 개선안이 없습니다.</div>')+
+   '<button class="lnk" onclick="refresh()" style="display:block;margin:18px auto">새로고침</button>';
+  $('app').onclick=function(e){var b=e.target.closest('[data-to]');if(b)go(b.dataset.to)}}
+function topicItem(t){var first=(t.body||'사진 제안').split('\n')[0];return '<button class="item" data-to="t/'+t.id+'"><div class="row"><span class="t sp">'+(t.kind==='edu'?'<span class="pill st">교육</span> ':'')+esc(first)+'</span><span class="mute">'+esc(nm(t.author_id))+'</span></div>'+
+  stepsHtml(t)+'<div class="mute" style="margin-top:6px">'+(t.status==='held'?'<span class="pill">보류</span> ':'')+(t.status==='new'?'<span class="pill">확인 대기</span> ':'')+'의견 '+(D.ccount[t.id]||0)+' · 개선안 '+D.ideas.filter(function(i){return i.topic_id===t.id}).length+' · '+ago(t.created_at)+'</div></button>'}
+function ideaItem(i){var ms=D.im.filter(function(x){return x.idea_id===i.id}).map(function(x){return nm(x.member_id)});
+  return '<button class="item" data-to="i/'+i.id+'"><div class="row"><span class="t sp">'+esc(i.title)+'</span>'+ideaPill(i)+'</div><div class="mute" style="margin-top:4px">'+esc(KIND[i.kind]||i.kind)+' · '+(ms.length?'도전 '+esc(ms.join(', ')):'도전자 모집 중')+'</div></button>'}
+
+/* ---------- 제안하기 ---------- */
+var draft=null;
+function showPost(){if(!draft){try{draft=JSON.parse(lsGet('sa-draft')||'null')}catch(e){}draft=draft||{body:'',pics:[]}}
+  $('app').innerHTML='<div class="card"><div style="font-size:19px;font-weight:800">제안하기 <span class="pill gold">+'+((D.rules.proposal||{}).pts||2)+'점</span></div>'+
+   '<div class="mute">어떤 위험이 있었고, 어떻게 하면 좋을까. 사진 한 장, 한 줄이라도 괜찮습니다.</div>'+
+   '<div class="pics" id="pp"></div><textarea id="pb" placeholder="예) 주입컵 옮길 때 고리가 한쪽으로 쏠립니다" style="margin-top:12px">'+esc(draft.body)+'</textarea>'+
+   '<div class="err" id="err"></div><button class="big" id="go" type="button">올리기</button></div>';
+  picsEditor($('pp'),draft.pics,6);
+  $('pb').oninput=function(){draft.body=this.value;saveDraft()};
+  $('go').onclick=function(){var b=$('pb').value.trim();if(!b&&!draft.pics.length){$('err').textContent='글이나 사진 중 하나는 넣어 주세요.';return}
+    if(busy)return;busy=true;var btn=$('go');btn.disabled=true;btn.textContent='올리는 중…';$('err').textContent='';
+    uploadAll(draft.pics).then(function(ps){saveDraft();return rpc('post_topic',{p_token:TOK,p_body:b,p_photos:ps})}).then(function(j){
+      draft=null;lsSet('sa-draft',null);ptsToast(j.pts,'제안 완료');D.at=0;go('t/'+j.id)})
+    .catch(function(e){$('err').textContent=e.message+' — 내용은 그대로 있으니 다시 눌러 주세요.';saveDraft()})
+    .then(function(){busy=false;if($('go')){$('go').disabled=false;$('go').textContent='올리기'}})}}
+function saveDraft(){if(!draft)return;lsSet('sa-draft',JSON.stringify({body:draft.body,pics:draft.pics.filter(function(x){return x.p}).map(function(x){return{p:x.p}})}))}
+
+/* ---------- 주제 ---------- */
+function showTopic(id){var t=D.topics.filter(function(x){return x.id===id})[0];if(!t){$('app').innerHTML='<div class="empty">주제를 찾지 못했습니다(숨겨졌을 수 있습니다).</div>';return}
+  Promise.all([get('comments?select=*&topic_id=eq.'+id+'&order=created_at.desc'),get('acks?select=member_id&target_type=eq.topic&target_id=eq.'+id)]).then(function(r){
+  var cs=r[0],acks=r[1],iAck=acks.some(function(a){return a.member_id===ME.member_id}),ideas=D.ideas.filter(function(i){return i.topic_id===id}),cp=[];
+  $('app').innerHTML='<button class="lnk" onclick="history.back()">← 뒤로</button>'+
+   '<div class="card"><div class="row"><b>'+esc(nm(t.author_id))+'</b><span class="mute">'+ago(t.created_at)+'</span><span class="sp"></span>'+(t.kind==='edu'?'<span class="pill st">교육 주제</span>':'<span class="pill">'+TST[t.status]+'</span>')+'</div>'+
+     '<div style="white-space:pre-wrap;margin-top:8px;font-size:17px">'+esc(t.body||'')+'</div>'+thumbs(t.photos)+stepsHtml(t)+
+     (t.reply?'<div class="card" style="background:var(--card2);margin-top:10px"><span class="pill gold">운영진</span> '+esc(t.reply)+'</div>':'')+
+     (t.video_url?'<a class="btn gold" style="display:inline-block;margin-top:10px;text-decoration:none" href="'+esc(t.video_url)+'" target="_blank" rel="noopener">▶ 교육 영상 보기</a>':'')+
+     (t.edu_date?'<div class="mute" style="margin-top:6px">교육 '+esc(t.edu_date)+'</div>':'')+
+     (t.risks&&t.risks.length?'<div class="chips">'+t.risks.map(function(x){return '<span class="pill">'+esc(x)+'</span>'}).join('')+'</div>':'')+
+     '<div class="row" style="margin-top:10px"><button class="btn'+(iAck?' on':'')+'" id="ackT" type="button">공감 '+acks.length+'</button><span class="sp"></span>'+
+     (t.author_id===ME.member_id?'<button class="lnk" id="edT" type="button">고치기</button>':'')+'</div></div>'+
+   (isAdmin()?adminTopicHtml(t):'')+
+   '<div class="h2">한 줄 의견 <span class="mute">아무 생각이나 던져 주세요</span></div>'+
+   '<div class="card"><textarea id="cb" placeholder="좋든 아니든 한 줄!" style="min-height:60px"></textarea><div class="pics" id="cp"></div><div class="err" id="cerr"></div><button class="big" id="cgo" type="button" style="margin-top:8px">의견 올리기</button>'+
+   '<div style="margin-top:10px">'+(cs.length?cs.map(function(c){return '<div class="cm"><div class="row"><span class="who">'+esc(nm(c.author_id))+'</span><span class="mute">'+ago(c.created_at)+'</span><span class="sp"></span>'+
+     (c.author_id===ME.member_id?'<button class="lnk" data-ec="'+c.id+'" type="button">고치기</button>':'')+(isAdmin()?'<button class="lnk" data-hc="'+c.id+'" type="button">숨김</button>':'')+'</div><div style="white-space:pre-wrap">'+esc(c.body||'')+'</div>'+thumbs(c.photos)+'</div>'}).join(''):'<div class="empty">첫 의견을 남겨 주세요.</div>')+'</div></div>'+
+   '<div class="h2">개선안 <span class="mute">토의에서 나온 개선할 것</span></div>'+(ideas.length?ideas.map(ideaItem).join(''):'<div class="empty">아직 개선안이 없습니다. 의견만 나눠도 괜찮습니다.</div>')+
+   '<div class="card" id="ideaForm"><b>＋ 개선안 올리기</b> <span class="pill gold">+'+((D.rules.idea||{}).pts||3)+'점</span><input type="text" id="it" placeholder="개선안 이름 (예: 고리 보강판 제작)" style="margin-top:8px">'+
+     '<div class="row" style="margin-top:8px" id="ik">'+['제작','행동','기타'].map(function(k,i){return '<button class="btn'+(i===0?' on':'')+'" data-k="'+k+'" type="button">'+KIND[k]+'</button>'}).join('')+'</div>'+
+     '<textarea id="ib" placeholder="어떻게 바꾸면 좋을까" style="margin-top:8px;min-height:70px"></textarea><div class="err" id="ierr"></div><button class="btn gold" id="igo" type="button" style="width:100%;padding:12px">개선안 올리기</button></div>';
+  picsEditor($('cp'),cp,3);
+  $('ackT').onclick=function(){if(iAck)return;rpc('ack',{p_token:TOK,p_type:'topic',p_id:id}).then(function(){route()})};
+  if($('edT'))$('edT').onclick=function(){editPost('topic',id,t.body||'')};
+  $('cgo').onclick=function(){var b=$('cb').value.trim();if(!b&&!cp.length){$('cerr').textContent='한 줄이라도 써 주세요.';return}if(busy)return;busy=true;var btn=$('cgo');btn.disabled=true;
+    uploadAll(cp).then(function(ps){return rpc('post_comment',{p_token:TOK,p_topic:id,p_body:b,p_photos:ps})}).then(function(j){ptsToast(j.pts,'의견 고맙습니다');D.at=0;route()})
+    .catch(function(e){$('cerr').textContent=e.message}).then(function(){busy=false;if($('cgo'))$('cgo').disabled=false})};
+  var kind='제작';$('ik').onclick=function(e){var b=e.target.closest('[data-k]');if(!b)return;kind=b.dataset.k;[].forEach.call(this.children,function(x){x.classList.toggle('on',x===b)})};
+  $('igo').onclick=function(){var ti=$('it').value.trim();if(!ti){$('ierr').textContent='개선안 이름을 써 주세요.';return}if(busy)return;busy=true;
+    rpc('post_idea',{p_token:TOK,p_topic:id,p_title:ti,p_body:$('ib').value,p_kind:kind}).then(function(j){ptsToast(j.pts,'개선안 등록');D.at=0;go('i/'+j.id)})
+    .catch(function(e){$('ierr').textContent=e.message}).then(function(){busy=false})};
+  $('app').onclick=function(e){var b=e.target.closest('[data-to]');if(b){go(b.dataset.to);return}
+    var ec=e.target.closest('[data-ec]');if(ec){var c=cs.filter(function(x){return x.id===ec.dataset.ec})[0];editPost('comment',c.id,c.body||'');return}
+    var hc=e.target.closest('[data-hc]');if(hc){hidePost('comment',hc.dataset.hc);return}};
+  if(isAdmin())bindAdminTopic(t)})}
+function editPost(type,id,cur,title){var v=prompt('고칠 내용을 넣어 주세요. (이전 내용은 기록에 남습니다)',cur);if(v==null||v===cur)return;
+  rpc('edit_post',{p_token:TOK,p_type:type,p_id:id,p_body:v,p_title:title||null}).then(function(){toast('고쳤습니다');D.at=0;route()}).catch(function(e){alert(e.message)})}
+function hidePost(type,id){var r=prompt('숨기는 이유를 적어 주세요. (받은 점수는 회수되고, 기록은 남습니다)');if(!r)return;
+  rpc('hide_post',{p_token:TOK,p_type:type,p_id:id,p_reason:r}).then(function(){toast('숨겼습니다');D.at=0;if(type==='comment')route();else go('home')}).catch(function(e){alert(e.message)})}
+
+/* 운영진: 주제 관리 */
+function adminTopicHtml(t){var S=['adopted','held','filmed','discussed','closed'];
+  return '<div class="card" style="border:2px solid var(--gold)"><b>운영진</b> <span class="mute">지금: '+TST[t.status]+'</span>'+
+   '<div class="chips" id="ast">'+S.map(function(s){return '<button class="btn'+(t.status===s?' on':'')+'" data-s="'+s+'" type="button">'+TST[s]+'</button>'}).join('')+'</div>'+
+   '<input type="text" id="arp" placeholder="한 줄 답 (제안한 직원에게 보입니다)" value="'+esc(t.reply||'')+'" style="margin-top:8px">'+
+   '<input type="url" id="avd" placeholder="영상 링크 (유튜브 일부 공개 등)" value="'+esc(t.video_url||'')+'" style="margin-top:8px">'+
+   '<div class="row" style="margin-top:8px"><input type="date" id="adt" value="'+esc(t.edu_date||'')+'"><input type="text" id="ark" placeholder="위험성평가 (쉼표로)" value="'+esc((t.risks||[]).join(', '))+'"></div>'+
+   '<div class="err" id="aerr"></div><div class="row"><button class="btn gold" id="asv" type="button">저장</button><button class="btn" id="aat" type="button">교육 참여 점수</button><span class="sp"></span><button class="btn bad" id="ahd" type="button">숨김</button></div><div id="attBox"></div></div>'}
+function bindAdminTopic(t){var st=t.status;
+  $('ast').onclick=function(e){var b=e.target.closest('[data-s]');if(!b)return;st=b.dataset.s;[].forEach.call(this.children,function(x){x.classList.toggle('on',x===b)})};
+  $('asv').onclick=function(){var rk=$('ark').value.split(',').map(function(x){return x.trim()}).filter(Boolean);
+    rpc('set_topic',{p_token:TOK,p_topic:t.id,p_status:st,p_reply:$('arp').value,p_video_url:$('avd').value,p_edu_date:$('adt').value||null,p_risks:rk})
+    .then(function(){toast('저장했습니다');D.at=0;route()}).catch(function(e){$('aerr').textContent=e.message})};
+  $('ahd').onclick=function(){hidePost('topic',t.id)};
+  $('aat').onclick=function(){var act=D.members.filter(function(m){return m.active});
+    $('attBox').innerHTML='<div class="mute" style="margin-top:8px">교육에 참여한 사람을 체크해 주세요 (+'+((D.rules.attend||{}).pts||3)+'점, 이미 받은 사람은 다시 안 들어갑니다)</div>'+
+      act.map(function(m){return '<label class="chk"><input type="checkbox" value="'+m.id+'" checked> '+esc(m.name)+' <span class="mute">'+esc(m.team)+'</span></label>'}).join('')+
+      '<button class="btn gold" id="aatGo" type="button" style="margin-top:8px">점수 주기</button>';
+    $('aatGo').onclick=function(){if(this.disabled)return;this.disabled=true;var ids=[].map.call($('attBox').querySelectorAll('input:checked'),function(x){return x.value});
+      rpc('award_attendance',{p_token:TOK,p_topic:t.id,p_members:ids}).then(function(k){toast(k+'명에게 점수');$('attBox').innerHTML=''}).catch(function(e){$('aerr').textContent=e.message})}}}
+
+/* ---------- 개선안 ---------- */
+function showIdea(id){var i=D.ideas.filter(function(x){return x.id===id})[0];if(!i){$('app').innerHTML='<div class="empty">개선안을 찾지 못했습니다.</div>';return}
+  get('acks?select=member_id&target_type=eq.idea&target_id=eq.'+id).then(function(acks){
+  var ms=D.im.filter(function(x){return x.idea_id===id}),mine=ms.some(function(x){return x.member_id===ME.member_id}),iAck=acks.some(function(a){return a.member_id===ME.member_id});
+  var t=i.topic_id?D.topics.filter(function(x){return x.id===i.topic_id})[0]:null,bp=[],ap=[];
+  $('app').innerHTML='<button class="lnk" onclick="history.back()">← 뒤로</button>'+
+   '<div class="card"><div class="row"><span class="pill">'+esc(KIND[i.kind])+'</span><span class="sp"></span>'+ideaPill(i)+'</div>'+
+    '<div style="font-size:20px;font-weight:800;margin-top:8px">'+esc(i.title)+'</div><div class="mute">'+esc(nm(i.author_id))+' · '+ago(i.created_at)+'</div>'+
+    (i.body?'<div style="white-space:pre-wrap;margin-top:8px">'+esc(i.body)+'</div>':'')+
+    (t?'<button class="lnk" data-to="t/'+t.id+'" type="button">주제: '+esc((t.body||'사진 제안').split('\n')[0])+'</button>':'')+
+    '<div class="h2" style="margin-top:12px;font-size:15px">도전자</div><div class="chips">'+(ms.length?ms.map(function(x){return '<span class="pill'+(x.credited?' ok':'')+'">'+esc(nm(x.member_id))+(x.credited?' ✓':'')+'</span>'}).join(''):'<span class="mute">아직 없습니다</span>')+'</div>'+
+    ((i.status==='open'||i.status==='doing')&&!mine?'<button class="big" id="join" type="button">도전하기 +'+((D.rules.join||{}).pts||2)+'점</button>':'')+
+    (i.judge_note&&i.status==='doing'?'<div class="card" style="background:var(--card2)"><span class="pill bad">보완 필요</span> '+esc(i.judge_note)+'</div>':'')+
+    (i.status==='review'||i.status==='done'?'<div class="h2" style="font-size:15px">개선 전 → 후</div>'+thumbs(i.before_photos)+thumbs(i.after_photos)+(i.done_note?'<div style="margin-top:6px">'+esc(i.done_note)+'</div>':''):'')+
+    (i.status==='done'?'<div class="card" style="text-align:center;background:var(--card2)"><div style="font-size:26px;font-weight:800" class="c-ok">CLEAR!</div><div class="mute">'+ymd(i.done_at)+(i.judge_note?' · '+esc(i.judge_note):'')+'</div></div>':'')+
+    '<div class="row" style="margin-top:10px"><button class="btn'+(iAck?' on':'')+'" id="ackI" type="button">확인했어요 '+acks.length+'</button><span class="sp"></span>'+
+    (i.author_id===ME.member_id?'<button class="lnk" id="edI" type="button">고치기</button>':'')+(isAdmin()?'<button class="lnk" id="hdI" type="button">숨김</button>':'')+'</div></div>'+
+   (mine&&i.status==='doing'?'<div class="card"><b>완료 확인 요청</b><div class="mute">개선 전·후 사진을 올리면 운영진이 확인합니다. 후 사진은 꼭 필요합니다.</div>'+
+     '<div class="mute" style="margin-top:8px">개선 전</div><div class="pics" id="bp"></div><div class="mute" style="margin-top:8px">개선 후</div><div class="pics" id="ap"></div>'+
+     '<textarea id="dn" placeholder="무엇을 어떻게 했는지" style="margin-top:8px;min-height:60px"></textarea><div class="err" id="derr"></div><button class="big" id="dgo" type="button">완료 확인 요청</button></div>':'')+
+   (isAdmin()&&i.status==='review'?'<div class="card" style="border:2px solid var(--gold)"><b>운영진 판단</b><div class="mute">실제로 한 사람만 체크해 주세요 (+'+((D.rules.done||{}).pts||20)+'점)</div>'+
+     ms.map(function(x){return '<label class="chk"><input type="checkbox" value="'+x.member_id+'" checked> '+esc(nm(x.member_id))+'</label>'}).join('')+
+     '<input type="text" id="jn" placeholder="한마디 (보완 필요일 때는 사유 필수)" style="margin-top:8px"><div class="err" id="jerr"></div>'+
+     '<div class="row"><button class="btn gold" id="jok" type="button" style="flex:1;padding:12px">완료 인정</button><button class="btn bad" id="jno" type="button" style="flex:1;padding:12px">보완 필요</button></div></div>':'');
+  $('app').onclick=function(e){var b=e.target.closest('[data-to]');if(b)go(b.dataset.to)};
+  if($('join'))$('join').onclick=function(){if(busy)return;busy=true;rpc('join_idea',{p_token:TOK,p_idea:id}).then(function(j){ptsToast(j.pts,'도전 시작!');D.at=0;route()}).catch(function(e){alert(e.message)}).then(function(){busy=false})};
+  $('ackI').onclick=function(){if(iAck)return;rpc('ack',{p_token:TOK,p_type:'idea',p_id:id}).then(function(){route()})};
+  if($('edI'))$('edI').onclick=function(){var v=prompt('개선안 이름',i.title);if(!v)return;editPost('idea',id,i.body||'',v)};
+  if($('hdI'))$('hdI').onclick=function(){hidePost('idea',id)};
+  if($('dgo')){picsEditor($('bp'),bp,3);picsEditor($('ap'),ap,3);
+    $('dgo').onclick=function(){if(!ap.length){$('derr').textContent='개선 후 사진을 한 장 이상 넣어 주세요.';return}if(busy)return;busy=true;var btn=$('dgo');btn.disabled=true;btn.textContent='올리는 중…';
+      uploadAll(bp).then(function(b){return uploadAll(ap).then(function(a){return rpc('request_done',{p_token:TOK,p_idea:id,p_before:b,p_after:a,p_note:$('dn').value})})})
+      .then(function(){toast('요청했습니다','운영진이 확인합니다');D.at=0;route()}).catch(function(e){$('derr').textContent=e.message+' — 다시 눌러 주세요.'})
+      .then(function(){busy=false;if($('dgo')){$('dgo').disabled=false;$('dgo').textContent='완료 확인 요청'}})}}
+  if($('jok')){function judge(ok){var ids=[].map.call($('app').querySelectorAll('.chk input:checked'),function(x){return x.value});
+      rpc('judge_idea',{p_token:TOK,p_idea:id,p_ok:ok,p_note:$('jn').value,p_credited:ok?ids:null}).then(function(){toast(ok?'클리어!':'보완 요청함');D.at=0;route()})
+      .catch(function(e){$('jerr').textContent={'사유 필요':'보완 필요 사유를 적어 주세요.','도전자 체크 필요':'한 사람 이상 체크해 주세요.'}[e.message]||e.message})}
+    $('jok').onclick=function(){judge(true)};$('jno').onclick=function(){judge(false)}}})}
+
+/* ---------- 내 기록 ---------- */
+function showMe(){lsSet('sa-seen',String(Date.now()));updateDots();
+  getAll('points?select=*&member_id=eq.'+ME.member_id+'&order=at.desc,id.desc').then(function(ps){
+  var tot=myScore(),L=level(tot),my=D.topics.filter(function(t){return t.author_id===ME.member_id}),
+      myI=D.ideas.filter(function(i){return D.im.some(function(x){return x.idea_id===i.id&&x.member_id===ME.member_id})}),
+      clears=D.im.filter(function(x){return x.member_id===ME.member_id&&x.credited}).length,
+      weeks={};ps.forEach(function(p){if(p.pts>0&&p.at>=monthStartISO())weeks[Math.floor((kst(p.at).getUTCDate()-1)/7)]=1});
+  var B=[['💡','첫 제안',my.length>0],['🎯','첫 채택',ps.some(function(p){return p.rule_key==='adopt'&&p.pts>0})],['🏆','첫 클리어',clears>=1],
+         ['🔧','클리어 3회',clears>=3],['👑','클리어 10회',clears>=10],['🔥','이달 매주 참여',Object.keys(weeks).length>=4],
+         ['💬','의견 10개',ps.filter(function(p){return(p.rule_key==='comment'||p.rule_key==='photo_comment')&&p.pts>0}).length>=10],['🙋','도전 5회',ps.filter(function(p){return p.rule_key==='join'}).length>=5],['🎓','교육 참여 5회',ps.filter(function(p){return p.rule_key==='attend'}).length>=5]];
+  $('app').innerHTML='<div class="card row">'+avatar(L.lv)+'<div class="sp"><b>'+esc(ME.name)+'</b> <span class="pill gold">'+esc(L.name)+'</span><div class="bar"><i style="width:'+L.pct+'%"></i></div><div class="mute">XP '+tot+(L.next?' · 다음 레벨까지 '+(L.next-tot)+'점':'')+'</div></div></div>'+
+   '<div class="h2">배지</div><div class="card">'+B.map(function(b){return '<span class="badge'+(b[2]?' got':'')+'"><b>'+b[0]+'</b>'+b[1]+'</span>'}).join('')+'</div>'+
+   '<div class="h2">내 제안 '+my.length+'</div>'+(my.length?my.map(topicItem).join(''):'<div class="empty">아직 제안이 없습니다.</div>')+
+   '<div class="h2">내가 도전한 개선 '+myI.length+'</div>'+(myI.length?myI.map(ideaItem).join(''):'<div class="empty">도전한 개선안이 없습니다.</div>')+
+   '<div class="h2">점수 내역</div><div class="card">'+(ps.length?ps.map(function(p){var r=D.rules[p.rule_key];return '<div class="cm row"><span class="sp">'+esc(p.rule_key==='adjust'?'운영진 조정':(r?r.label:p.rule_key))+(p.note?' <span class="mute">'+esc(p.note)+'</span>':'')+'</span><b class="'+(p.pts<0?'c-bad':'c-gold')+'">'+(p.pts>0?'+':'')+p.pts+'</b><span class="mute" style="width:70px;text-align:right">'+ymd(p.at)+'</span></div>'}).join(''):'<div class="empty">아직 점수가 없습니다.</div>')+'</div>'+
+   '<div class="h2">레벨표</div><div class="card"><table class="lvtab">'+LV.slice(0,12).map(function(v,k){return '<tr'+(k+1===L.lv?' class="c-gold"':'')+'><td>LV '+(k+1)+'</td><td>'+LVN[k]+'</td><td style="text-align:right">'+v+'점~</td></tr>'}).join('')+'</table>'+
+     '<div class="mute" style="margin-top:8px">'+Object.keys(D.rules).filter(function(k){return k[0]!=='_'}).map(function(k){return D.rules[k].label+' +'+D.rules[k].pts}).join(' · ')+'<br>제안·의견·개선안·도전 점수는 하루 '+((D.rules._cap||{}).pts||5)+'점까지</div></div>'+
+   '<button class="lnk" id="out" style="display:block;margin:18px auto">로그아웃</button>';
+  $('app').onclick=function(e){var b=e.target.closest('[data-to]');if(b)go(b.dataset.to)};
+  $('out').onclick=function(){if(!confirm('로그아웃할까요? 다시 들어올 때 번호가 필요합니다.'))return;rpc('logout',{p_token:TOK}).catch(function(){});logoutLocal();draft=null;lsSet('sa-draft',null);showLogin()}})}
+
+/* ---------- 운영진 목록 ---------- */
+function showAdmin(){if(!isAdmin()){go('home');return}
+  var nw=D.topics.filter(function(t){return t.status==='new'}),rv=D.ideas.filter(function(i){return i.status==='review'});
+  $('app').innerHTML='<div class="h2">새 제안 '+nw.length+'</div>'+(nw.length?nw.map(topicItem).join(''):'<div class="empty">확인할 제안이 없습니다.</div>')+
+   '<div class="h2">완료 확인 요청 '+rv.length+'</div>'+(rv.length?rv.map(ideaItem).join(''):'<div class="empty">판단할 개선안이 없습니다.</div>');
+  $('app').onclick=function(e){var b=e.target.closest('[data-to]');if(b)go(b.dataset.to)}}
+
+/* ---------- 시작 ---------- */
+(function(){try{fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(function(r){var t=r.headers.get('etag')||r.headers.get('last-modified');if(!t)return;var o=lsGet('sa-ver');lsSet('sa-ver',t);
+  if(o&&o!==t&&!/[?&]v=/.test(location.search))location.replace(location.pathname+'?v='+Date.now())}).catch(function(){})}catch(e){}})();
+TOK=lsGet('sa-token');try{ME=JSON.parse(lsGet('sa-me')||'null')}catch(e){ME=null}if(!ME)TOK=null;
+if(TOK)rpc('me',{p_token:TOK}).then(function(m){ME={member_id:m.member_id,name:m.name,role:m.role};lsSet('sa-me',JSON.stringify(ME));route()}).catch(function(){if(!TOK)showLogin();else route()});
+else showLogin();
+</script>
+</body>
+</html>
